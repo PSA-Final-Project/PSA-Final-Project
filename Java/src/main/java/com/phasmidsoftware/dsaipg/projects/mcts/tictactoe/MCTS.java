@@ -79,9 +79,9 @@ public class MCTS {
             int movePlayer = (node.getParent() == null) ? -1 : node.getParent().state().player();
 
             if (result == -1) {
-                node.setWins(node.wins() + 0.5);
+                node.setWins(node.wins() + 0.0);
             } else if (movePlayer == result) {
-                node.setWins(node.wins() + 1);
+                node.setWins(node.wins() + 3);
             }
 
             node = node.getParent();
