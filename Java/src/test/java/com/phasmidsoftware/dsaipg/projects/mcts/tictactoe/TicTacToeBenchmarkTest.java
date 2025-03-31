@@ -17,7 +17,7 @@ public class TicTacToeBenchmarkTest {
      */
     @Test(timeout = 10000)
     public void testMainCreatesCSVFile() throws Exception {
-        String filePath = "src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/CSVResult/benchmark_doubling.csv";
+        String filePath = "src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/CSVResult/benchmark.csv";
         File file = new File(filePath);
         // Delete the file if it exists from a previous run.
         if (file.exists()) {

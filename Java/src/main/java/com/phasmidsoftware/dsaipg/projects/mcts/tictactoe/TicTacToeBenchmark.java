@@ -13,7 +13,7 @@ public class TicTacToeBenchmark {
         int gamesPerSetting = 50;
         int startIterations = 100;
         int maxIterations = 1600;
-        String filePath = "src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/CSVResult/benchmark_doubling.csv";
+        String filePath = "Java/src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/CSVResult/benchmark.csv";
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("Iterations,AvgTotalTime(ms),WinsX,AvgTimeX(ms),WinsO,AvgTimeO(ms),Draws,AvgTimeDraw(ms)");
