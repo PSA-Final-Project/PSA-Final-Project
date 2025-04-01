@@ -3,6 +3,7 @@ package com.phasmidsoftware.dsaipg.projects.mcts.tictactoe;
 import com.phasmidsoftware.dsaipg.projects.mcts.core.State;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Optional;
@@ -14,6 +15,8 @@ public class TicTacToeBenchmark {
         int startIterations = 100;
         int maxIterations = 1600;
         String filePath = "Java/src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/CSVResult/benchmark.csv";
+        File file = new File(filePath);
+        file.getParentFile().mkdirs();
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("Iterations,AvgTotalTime(ms),WinsX,AvgTimeX(ms),WinsO,AvgTimeO(ms),Draws,AvgTimeDraw(ms)");

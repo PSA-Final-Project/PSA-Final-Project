@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.Random;
 
 public class TicTacToeNode implements Node<TicTacToe> {
-    private final Random random = new Random();
     private Node<TicTacToe> parent;
     private double wins;
     private int playouts;
