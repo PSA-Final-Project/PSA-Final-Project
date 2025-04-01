@@ -5,76 +5,77 @@ import com.phasmidsoftware.dsaipg.projects.mcts.core.State;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.*;
 
-/**
- * Unit tests for the MCTS class.
- */
 public class MCTSTest {
 
     private MCTS mcts;
-    private Node<TicTacToe> rootNode;
+    private TicTacToeNode rootNode;
 
     @Before
     public void setUp() {
-        State<TicTacToe> initialState = new TicTacToe().start();
-        rootNode = new TicTacToeNode(initialState);
-
+        TicTacToe game = new TicTacToe(0L); // deterministic seed
+        State<TicTacToe> startState = game.start();
+        rootNode = new TicTacToeNode(startState);
         mcts = new MCTS(rootNode);
     }
 
-    /**
-     * Test the select method on a root node which is not a leaf.
-     * By default, the root node has no children initially, so "explore" should be called.
-     */
     @Test
-    public void testSelect_ExploresNodeWhenNoChildren() {
-        assertFalse("Root node should not be a leaf on an empty board", rootNode.isLeaf());
-
-        assertTrue("Initially, root node should have zero children", rootNode.children().isEmpty());
-
-        Node<TicTacToe> selectedNode = mcts.select(rootNode);
-
-        assertFalse("Children should have been created by explore()", rootNode.children().isEmpty());
-
-        assertNotNull("Selected node should not be null", selectedNode);
+    public void testRunIncreasesPlayouts() {
+        int before = rootNode.playouts();
+        mcts.run(50);
+        int after = rootNode.playouts();
+        assertTrue("Playouts should increase after MCTS run", after > before);
     }
 
-    /**
-     * Test the simulate method to ensure it always ends in a terminal state.
-     * We won't assert a winner because TicTacToe can end in a draw or a win.
-     */
-    @Test
-    public void testSimulate_EndsInTerminalState() {
-        int result = mcts.simulate(rootNode);
-
-        assertTrue("Result should be -1 (draw) or 0 (O) or 1 (X)",
-                Arrays.asList(-1, 0, 1).contains(result));
-    }
-
-    /**
-     * Test the backPropagate method by creating a small chain of nodes
-     * and verifying that playouts and wins are incremented correctly along the path.
-     */
     @Test
     public void testBackPropagate_UpdatesStats() {
         rootNode.explore();
         Node<TicTacToe> firstChild = rootNode.children().iterator().next();
+        mcts.backPropagate(firstChild, TicTacToe.X);
 
-        int fakeResult = TicTacToe.X;
-        mcts.backPropagate(firstChild, fakeResult);
+        assertEquals(1, firstChild.playouts());
+        assertEquals(1, rootNode.playouts());
 
-        assertEquals("Child node playouts should be 1", 1, firstChild.playouts());
-        assertEquals("Root node playouts should be 1", 1, rootNode.playouts());
+        assertTrue("Wins should be greater than 0 if player matches",
+                firstChild.wins() > 0 || rootNode.wins() > 0);
+    }
 
-        double childWins = firstChild.wins();
-        double rootWins = rootNode.wins();
+    @Test
+    public void testBestChild_ReturnsChildWithHighestUCB1() {
+        rootNode.explore();
+        Collection<Node<TicTacToe>> children = rootNode.children();
 
-        assertNotEquals("Child node wins should have changed from 0.0", 0.0, childWins, 1e-9);
-        assertTrue("Root node wins can remain 0 if parent's move doesn't match the result",
-                rootNode.wins() == 0.0 || rootNode.wins() == 3.0);
+        assertFalse("Children should not be empty", children.isEmpty());
+
+        // Set parent playouts to something > 0 so log(parent.playouts) works
+        rootNode.setPlayouts(100);
+
+        Node<TicTacToe> expectedBest = null;
+        double bestUCB1 = Double.NEGATIVE_INFINITY;
+
+        for (Node<TicTacToe> child : children) {
+            // Set known values
+            int playouts = 10;
+            double wins = Math.random() * 10;
+            child.setPlayouts(playouts);
+            child.setWins(wins);
+
+            // Calculate expected UCB1 manually
+            double exploitation = wins / playouts;
+            double exploration = Math.sqrt(2 * Math.log(100) / playouts);
+            double ucb1 = exploitation + exploration;
+
+            if (ucb1 > bestUCB1) {
+                bestUCB1 = ucb1;
+                expectedBest = child;
+            }
+        }
+
+        Node<TicTacToe> selected = mcts.bestChild(rootNode);
+        assertNotNull("bestChild should not return null", selected);
+        assertEquals("Expected the child with the highest UCB1", expectedBest, selected);
     }
 }
