@@ -285,4 +285,8 @@ public class Position {
     private final int count;
     private final static int gridSize = 3;
     private final int[] xxx;
+
+    public int[][] getGrid() {
+        return copyGrid();
+    }
 }

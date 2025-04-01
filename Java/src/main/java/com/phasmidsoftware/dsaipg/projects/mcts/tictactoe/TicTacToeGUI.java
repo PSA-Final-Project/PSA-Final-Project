@@ -13,6 +13,7 @@ public class TicTacToeGUI extends JFrame {
     private TicTacToe.TicTacToeState currentState;
     private MCTS mcts;
     private TicTacToeNode rootNode;
+    private JComboBox<String> difficultyBox; // ✅ ADDED
 
     private JButton resetButton;
     private JButton aiMoveButton;
@@ -25,7 +26,8 @@ public class TicTacToeGUI extends JFrame {
 
         setTitle("Tic-Tac-Toe");
         setLayout(new BorderLayout());
-        setSize(300, 400);
+        setSize(400, 450);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel boardPanel = new JPanel();
@@ -53,8 +55,13 @@ public class TicTacToeGUI extends JFrame {
         aiMoveButton = new JButton("AI Move");
         aiMoveButton.addActionListener(e -> aiMove());
 
+        // ✅ Difficulty dropdown added here
+        String[] levels = {"Easy", "Medium", "Hard"};
+        difficultyBox = new JComboBox<>(levels);
         controlPanel.add(resetButton);
         controlPanel.add(aiMoveButton);
+        controlPanel.add(new JLabel("Difficulty:"));
+        controlPanel.add(difficultyBox);
 
         add(boardPanel, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.SOUTH);
@@ -62,7 +69,6 @@ public class TicTacToeGUI extends JFrame {
         setVisible(true);
     }
 
-    // Method to count the number of moves played
     private int countMoves() {
         int count = 0;
         for (int i = 0; i < 3; i++) {
@@ -78,13 +84,11 @@ public class TicTacToeGUI extends JFrame {
     private void playerMove(int x, int y) {
         if (currentState.isTerminal() || !buttons[x][y].getText().equals(".")) return;
 
-        // Check if it's X's turn
         if (countMoves() % 2 != 0) {
             System.out.println("It's not Player X's turn!");
             return;
         }
 
-        // Player X makes a move
         currentState = (TicTacToe.TicTacToeState) currentState.next(new TicTacToe.TicTacToeMove(TicTacToe.X, x, y));
         buttons[x][y].setText("X");
         buttons[x][y].setEnabled(false);
@@ -97,15 +101,40 @@ public class TicTacToeGUI extends JFrame {
     private void aiMove() {
         if (currentState.isTerminal()) return;
 
-        // Ensure it's O's turn before AI plays
         if (countMoves() % 2 == 0) {
             System.out.println("It's not AI's turn!");
             return;
         }
 
+        // ✅ Get difficulty level
+        String selectedLevel = (String) difficultyBox.getSelectedItem();
+        int iterations = switch (selectedLevel) {
+            case "Easy" -> 0;          // Random
+            case "Medium" -> 1000;
+            case "Hard" -> 5000;
+            default -> 1000;
+        };
+
+        if (iterations == 0) {
+            List<int[]> emptySpots = getEmptySpots();
+            if (!emptySpots.isEmpty()) {
+                int[] move = emptySpots.get(new java.util.Random().nextInt(emptySpots.size()));
+                int row = move[0], col = move[1];
+                currentState = (TicTacToe.TicTacToeState) currentState.next(
+                        new TicTacToe.TicTacToeMove(TicTacToe.O, row, col));
+                buttons[row][col].setText("O");
+                buttons[row][col].setEnabled(false);
+                if (currentState.isTerminal()) {
+                    displayGameOver();
+                }
+            }
+            return;
+        }
+
+        // Medium or Hard difficulty: MCTS
         rootNode = new TicTacToeNode(currentState);
         mcts = new MCTS(rootNode);
-        mcts.run(1000);
+        mcts.run(iterations);
 
         Node<TicTacToe> bestMoveNode = mcts.bestChild(rootNode);
         if (bestMoveNode == null) {
@@ -113,54 +142,37 @@ public class TicTacToeGUI extends JFrame {
             return;
         }
 
-        TicTacToe.TicTacToeState bestMoveState = (TicTacToe.TicTacToeState) bestMoveNode.state();
-        if (bestMoveState == null) {
-            System.out.println("AI move state is invalid!");
+        Position before = currentState.position();
+        Position after = ((TicTacToe.TicTacToeState) bestMoveNode.state()).position();
+        int[] moveCoords = findMoveCoordinates(before, after);
+        if (moveCoords == null) {
+            System.out.println("AI move could not be identified.");
             return;
         }
 
-        // Get a list of available (empty) spots on the board
-        List<int[]> emptySpots = getEmptySpots();
-        if (emptySpots.isEmpty()) {
-            System.out.println("No available moves for AI!");
-            return;
+        int row = moveCoords[0], col = moveCoords[1];
+        currentState = (TicTacToe.TicTacToeState) bestMoveNode.state();
+        buttons[row][col].setText("O");
+        buttons[row][col].setEnabled(false);
+
+        if (currentState.isTerminal()) {
+            displayGameOver();
         }
-
-        // Choose the best move based on the MCTS result (e.g., using the first available move)
-        for (int[] move : emptySpots) {
-            int row = move[0];
-            int col = move[1];
-
-            // Make sure the move is valid
-            if (!buttons[row][col].getText().equals(".")) {
-                System.out.println("AI tried to move to an occupied position!");
-                continue;
-            }
-
-            // Update state with AI's move
-            currentState = (TicTacToe.TicTacToeState) currentState.next(new TicTacToe.TicTacToeMove(TicTacToe.O, row, col));
-
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                buttons[row][col].setText("O");
-                buttons[row][col].setEnabled(false);
-
-                if (currentState.isTerminal()) {
-                    displayGameOver();
-                }
-            });
-            return; // Exit after making a valid move
-        }
-
-        System.out.println("AI couldn't find a valid move!");
     }
 
-    // Helper method to get empty spots on the board
+    private int[] findMoveCoordinates(Position before, Position after) {
+        int[][] g1 = before.getGrid();
+        int[][] g2 = after.getGrid();
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (g1[i][j] != g2[i][j]) {
+                    return new int[]{i, j};
+                }
+            }
+        }
+        return null;
+    }
+
     private List<int[]> getEmptySpots() {
         List<int[]> emptySpots = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
@@ -173,12 +185,11 @@ public class TicTacToeGUI extends JFrame {
         return emptySpots;
     }
 
-
     private void displayGameOver() {
         String winner = "It's a draw!";
         Optional<Integer> gameResult = currentState.winner();
         if (gameResult.isPresent()) {
-            winner = (gameResult.get() == TicTacToe.X) ? "Player X Wins!" : "Player O Wins!";
+            winner = (gameResult.get() == TicTacToe.X) ? "Player X Wins!" : "AI Wins!";
         }
 
         JOptionPane.showMessageDialog(this, winner, "Game Over", JOptionPane.INFORMATION_MESSAGE);
