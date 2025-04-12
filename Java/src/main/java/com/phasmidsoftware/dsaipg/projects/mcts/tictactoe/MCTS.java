@@ -28,6 +28,7 @@ public class MCTS {
     public Node<TicTacToe> getRoot() {
         return root;
     }
+
     public void run(int iterations) {
         for (int i = 0; i < iterations; i++) {
             Node<TicTacToe> node = select(root);

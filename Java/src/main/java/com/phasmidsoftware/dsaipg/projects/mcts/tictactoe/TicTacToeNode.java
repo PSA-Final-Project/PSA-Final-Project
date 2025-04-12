@@ -16,6 +16,8 @@ public class TicTacToeNode implements Node<TicTacToe> {
     private Node<TicTacToe> parent;
     private double wins;
     private int playouts;
+    private final State<TicTacToe> state;
+    private final ArrayList<Node<TicTacToe>> children;
 
     /**
      * @return true if this node is a leaf node (in which case no further exploration is possible).
@@ -128,7 +130,4 @@ private void initializeNodeData() {
         this.wins = 0.0;
     }
 }
-
-    private final State<TicTacToe> state;
-    private final ArrayList<Node<TicTacToe>> children;
 }
