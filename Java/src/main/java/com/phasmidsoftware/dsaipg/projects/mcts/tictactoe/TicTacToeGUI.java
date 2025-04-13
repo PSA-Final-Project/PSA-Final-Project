@@ -13,7 +13,7 @@ public class TicTacToeGUI extends JFrame {
     private TicTacToe.TicTacToeState currentState;
     private MCTS mcts;
     private TicTacToeNode rootNode;
-    private JComboBox<String> difficultyBox; // ✅ ADDED
+    private JComboBox<String> difficultyBox;
 
     private JButton resetButton;
     private JButton aiMoveButton;
@@ -55,7 +55,6 @@ public class TicTacToeGUI extends JFrame {
         aiMoveButton = new JButton("AI Move");
         aiMoveButton.addActionListener(e -> aiMove());
 
-        // ✅ Difficulty dropdown added here
         String[] levels = {"Easy", "Medium", "Hard"};
         difficultyBox = new JComboBox<>(levels);
         controlPanel.add(resetButton);
@@ -106,7 +105,6 @@ public class TicTacToeGUI extends JFrame {
             return;
         }
 
-        // ✅ Get difficulty level
         String selectedLevel = (String) difficultyBox.getSelectedItem();
         int iterations = switch (selectedLevel) {
             case "Easy" -> 0;          // Random
