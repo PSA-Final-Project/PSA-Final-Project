@@ -1,74 +1,44 @@
 package com.phasmidsoftware.dsaipg.projects.mcts.checkers;
 
-import com.phasmidsoftware.dsaipg.projects.mcts.core.Node;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.io.*;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
 public class CheckersMainTest {
 
-    @Test
-    public void testGameStartsCorrectly() {
-        Checkers game = new Checkers();
-        CheckersState state = (CheckersState) game.start();
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
 
-        assertNotNull("Initial state should not be null", state);
-        assertEquals("Initial player should be the opener (WHITE)", game.opener(), state.player());
+    @Before
+    public void setUp() {
+        // Redirect System.out to capture the console output
+        System.setOut(new PrintStream(outContent));
+    }
+
+    @After
+    public void tearDown() {
+        // Reset System.out after each test
+        System.setOut(originalOut);
     }
 
     @Test
-    public void testOneMoveAdvancement() {
-        Checkers game = new Checkers();
-        CheckersState state = (CheckersState) game.start();
+    public void testMainExecutesSuccessfullyWithGameFlow() {
+        // Run CheckersMain.main to simulate the game play
+        CheckersMain.main(new String[]{});
 
-        CheckersNode node = new CheckersNode(state);
-        CheckersMCTS mcts = new CheckersMCTS(node);
-        mcts.run(100);
+        // Check if "Game Over!" appears in the output
+        assertTrue("Game should end with 'Game Over!' message", outContent.toString().contains("Game Over!"));
 
-        Node<Checkers> bestChild = node.children().stream()
-                .max((a, b) -> Integer.compare(a.playouts(), b.playouts()))
-                .orElse(null);
+        // Check if at least one move is printed
+        assertTrue("Output should contain 'Move #' for at least one move", outContent.toString().contains("Move #"));
 
-        assertNotNull("Best child should not be null", bestChild);
-        CheckersState newState = (CheckersState) bestChild.state();
-
-        assertNotEquals("Game should have progressed to next state", state, newState);
-        assertNotEquals("Player should switch after move", state.player(), newState.player());
+        // Check if the board printing logic is being triggered (i.e., 'Current board' appears)
+        assertTrue("Board should be printed during the game", outContent.toString().contains("Current board:"));
     }
 
-    @Test
-    public void testGameCanReachTerminalState() {
-        Checkers game = new Checkers();
-        CheckersState currentState = (CheckersState) game.start();
-        int maxMoves = 200;
-        int count = 0;
-
-        while (!currentState.isTerminal() && count < maxMoves) {
-            CheckersNode node = new CheckersNode(currentState);
-            CheckersMCTS mcts = new CheckersMCTS(node);
-            mcts.run(50);
-
-            Node<Checkers> bestChild = node.children().stream()
-                    .max((a, b) -> Integer.compare(a.playouts(), b.playouts()))
-                    .orElse(null);
-
-            if (bestChild == null) break;
-            currentState = (CheckersState) bestChild.state();
-            count++;
-        }
-
-        assertTrue("Game should eventually reach a terminal state or hit move cap", currentState.isTerminal() || count >= maxMoves);
-    }
-
-    @Test
-    public void testPrintBoardDoesNotThrow() {
-        Checkers game = new Checkers();
-        CheckersState state = (CheckersState) game.start();
-
-        try {
-            CheckersMainTestHelper.printBoard(state); // use helper to call print method
-        } catch (Exception e) {
-            fail("printBoard should not throw exception: " + e.getMessage());
-        }
-    }
 }

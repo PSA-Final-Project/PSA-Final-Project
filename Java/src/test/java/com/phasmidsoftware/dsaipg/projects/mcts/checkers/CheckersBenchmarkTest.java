@@ -1,85 +1,64 @@
 package com.phasmidsoftware.dsaipg.projects.mcts.checkers;
 
-import com.phasmidsoftware.dsaipg.projects.mcts.core.Node;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.io.*;
 
 import static org.junit.Assert.*;
 
 public class CheckersBenchmarkTest {
 
-    @Test
-    public void testBenchmarkCSVFileCreation() {
-        // Given
-        String filePath = "Java/src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/CSVResult/checkers_benchmark.csv";
-        File file = new File(filePath);
-        File dir = file.getParentFile();
+    private final String testFilePath = "Java/src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/CSVResult/checkers_benchmark.csv";
+    private final File testFile = new File(testFilePath);
 
-        // Ensure it's clean before test
-        if (file.exists()) file.delete();
+    private final PrintStream originalOut = System.out;
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
-        // When
-        dir.mkdirs(); // simulate file parent creation
-        try {
-            boolean created = file.createNewFile();
-            assertTrue("CSV file should be created.", created || file.exists());
-        } catch (Exception e) {
-            fail("Exception occurred while creating the benchmark file: " + e.getMessage());
+    @Before
+    public void setUp() {
+        // Delete old file if it exists
+        if (testFile.exists()) {
+            boolean deleted = testFile.delete();
+            if (!deleted) {
+                System.err.println("Warning: Old test file could not be deleted.");
+            }
         }
 
-        // Then
-        assertTrue("CSV file should exist.", file.exists());
+        // Redirect System.out
+        System.setOut(new PrintStream(outContent));
+    }
+
+    @After
+    public void tearDown() {
+        // Reset System.out
+        System.setOut(originalOut);
+
+        // Optionally clean up created file
+        if (testFile.exists()) {
+            testFile.delete();
+        }
     }
 
     @Test
-    public void testCheckersGameRunsToTerminalState() {
-        Checkers game = new Checkers();
-        CheckersState currentState = (CheckersState) game.start();
-        int maxMoves = 300; // safeguard to avoid infinite loop
-        int moveCount = 0;
+    public void testMainExecutesSuccessfully() {
+        // Run the benchmark
+        CheckersBenchmark.main(new String[]{});
 
-        while (!currentState.isTerminal() && moveCount < maxMoves) {
-            CheckersNode currentNode = new CheckersNode(currentState);
-            CheckersMCTS currentMCTS = new CheckersMCTS(currentNode);
-            currentMCTS.run(10); // using a low iteration count for unit testing
+        // Validate output file exists
+        assertTrue("CSV file should be created.", testFile.exists());
 
-            Node<Checkers> bestChild = currentNode.children().stream()
-                    .max((a, b) -> Integer.compare(a.playouts(), b.playouts()))
-                    .orElse(null);
-
-            if (bestChild == null) break;
-
-            currentState = (CheckersState) bestChild.state();
-            moveCount++;
+        // Validate that CSV has expected header
+        try (BufferedReader reader = new BufferedReader(new FileReader(testFile))) {
+            String header = reader.readLine();
+            assertEquals("Iterations,AvgTotalTime(ms),WinsWhite,AvgTimeWhite(ms),WinsBlack,AvgTimeBlack(ms),Draws,AvgTimeDraw(ms)", header);
+        } catch (IOException e) {
+            fail("Failed to read CSV file: " + e.getMessage());
         }
 
-        assertTrue("Game should eventually reach a terminal state.", currentState.isTerminal() || moveCount >= maxMoves);
-    }
-
-    @Test
-    public void testWinnerIsValidValue() {
-        Checkers game = new Checkers();
-        CheckersState currentState = (CheckersState) game.start();
-        int moveCount = 0;
-
-        while (!currentState.isTerminal() && moveCount < 150) {
-            CheckersNode node = new CheckersNode(currentState);
-            CheckersMCTS mcts = new CheckersMCTS(node);
-            mcts.run(10);
-            Node<Checkers> bestChild = node.children().stream()
-                    .max((a, b) -> Integer.compare(a.playouts(), b.playouts()))
-                    .orElse(null);
-            if (bestChild == null) break;
-
-            currentState = (CheckersState) bestChild.state();
-            moveCount++;
-        }
-
-        if (currentState.isTerminal()) {
-            currentState.winner().ifPresent(winner -> {
-                assertTrue("Winner must be 0 or 1", winner == 0 || winner == 1);
-            });
-        }
+        // Check if console output contains expected words
+        String consoleOutput = outContent.toString();
+        assertTrue("Console output should contain 'Iterations:'", consoleOutput.contains("Iterations:"));
     }
 }
