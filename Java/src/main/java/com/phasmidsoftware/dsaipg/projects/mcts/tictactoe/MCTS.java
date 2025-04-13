@@ -64,7 +64,7 @@ public class MCTS {
 
     int simulate(Node<TicTacToe> node) {
         State<TicTacToe> state = node.state();
-        Random random = new Random();
+        Random random = state.random();
         while (!state.isTerminal()) {
             List<Move<TicTacToe>> moves = new ArrayList<>(state.moves(state.player()));
             Move<TicTacToe> move = moves.get(random.nextInt(moves.size()));
@@ -80,9 +80,9 @@ public class MCTS {
             int movePlayer = (node.getParent() == null) ? -1 : node.getParent().state().player();
 
             if (result == -1) {
-                node.setWins(node.wins() + 0.5);
+                node.setWins(node.wins() + 0.9); // encourage draw slightly less than win
             } else if (movePlayer == result) {
-                node.setWins(node.wins() + 2);
+                node.setWins(node.wins() + 1.0); // lower win weight to avoid over-aggression
             }
 
             node = node.getParent();
