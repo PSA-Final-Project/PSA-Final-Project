@@ -135,6 +135,45 @@ class CheckersState implements State<Checkers> {
         return result;
     }
 
+    public Collection<Move<Checkers>> movesHuman(int player) {
+        List<Move<Checkers>> result = new ArrayList<>();
+        int pieceCode = (player == 0) ? 1 : 2;         // 1 = White, 2 = Black
+        int direction = (player == 0) ? -1 : 1;        // White moves up, Black moves down
+
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                if (board[row][col] == pieceCode) {
+                    // Non-capturing diagonal moves (1 step)
+                    for (int dCol = -1; dCol <= 1; dCol += 2) {
+                        int newRow = row + direction;
+                        int newCol = col + dCol;
+                        if (isInBounds(newRow, newCol) && board[newRow][newCol] == 0) {
+                            result.add(new CheckersMove(player, row, col, newRow, newCol));
+                        }
+                    }
+
+                    // Capturing diagonal moves (2 steps)
+                    for (int dCol = -2; dCol <= 2; dCol += 4) {
+                        int newRow = row + 2 * direction;
+                        int newCol = col + dCol;
+                        int midRow = row + direction;
+                        int midCol = col + dCol / 2;
+
+                        if (isInBounds(newRow, newCol)
+                                && board[newRow][newCol] == 0
+                                && board[midRow][midCol] != 0
+                                && board[midRow][midCol] != pieceCode) {
+                            result.add(new CheckersMove(player, row, col, newRow, newCol));
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+
     private boolean isInBounds(int row, int col) {
         return row >= 0 && row < 8 && col >= 0 && col < 8;
     }

@@ -106,7 +106,7 @@ public class CheckersGUI extends JFrame {
         if (board[row][col] == 1) {
             selectedRow = row;
             selectedCol = col;
-            validTargets = state.moves(0).stream()
+            validTargets = state.movesHuman(0).stream()
                     .map(m -> (CheckersMove) m)
                     .filter(m -> m.fromRow == row && m.fromCol == col)
                     .map(m -> new Point(m.toRow, m.toCol))
@@ -118,7 +118,7 @@ public class CheckersGUI extends JFrame {
 
         if (selectedRow != -1) {
             CheckersMove move = new CheckersMove(0, selectedRow, selectedCol, row, col);
-            boolean isValid = state.moves(0).stream()
+            boolean isValid = state.movesHuman(0).stream()
                     .map(m -> (CheckersMove) m)
                     .anyMatch(m ->
                             m.fromRow == move.fromRow && m.fromCol == move.fromCol &&
