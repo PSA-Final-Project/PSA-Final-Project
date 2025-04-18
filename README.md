@@ -1,59 +1,126 @@
-# DSAIPG
-## Introduction and Provenance
-Companion repository to:
-"Data Structures, Algorithms, and Invariants--A Practical Guide"
-by Robin Hillyard, College of Engineering, Northeastern University, Boston, MA, USA.
-Published by Cognella.
+# 🎮 Monte Carlo Tree Search Games – TicTacToe & Checkers
 
-This is version 1-2 (second revision of the first edition).
+This project implements **TicTacToe** and **Checkers** using the **Monte Carlo Tree Search (MCTS)** algorithm. It includes complete game logic, a GUI built with Java Swing, benchmarking tools, and analysis of performance based on iteration counts.
 
-## Installation
-There are two major directories within this repository:
-* Java
-* Python
+---
 
-The repository is designed to be cloned from https://github.com/rchillyard/DSAIPG.git
-Alternatively, if you will be submitting assignments based on the repository,
-then you might want to fork it instead.
+## 📌 Features
 
-The Java repository contains a Maven project (see the `pom.xnl` file in the top level).
-Ideally, you will use an IDE that is suited to Maven projects.
-I recommend IntelliJ IDEA for Java work.
+### ✅ Common (Both Games)
+- Implemented using Java
+- MCTS-based AI opponent
+- Java Swing-based user interface
+- Benchmarking tools to measure performance
+- Deterministic randomness for reproducible tests
 
-## Navigation
-The simplest way to find code is just to use the `Navigate/Class` menu.
-It is good at recognizing what you're looking for.
-However, note that the first character of all classes is upper case (and you will need to search thus).
+### 🎯 TicTacToe
+- 3x3 board game
+- Player X (human) vs Player O (AI)
+- Supports difficulty levels:
+    - Easy: Random
+    - Medium: Blocking & Winning Heuristics
+    - Hard: MCTS-based
+- Terminal state detection (win/draw)
+- Full unit test coverage
 
-Exercises and code relating to the various chapters can be found as given below and under the package `com.phasmidsoftware.dsaipg`:
-* Chapters 1 and 2: `misc` and `util`; (if any)
-* Chapters 3 through 6: `adt`;
-* Chapters 7 and 8: `sort` (and `select`);
-* Chapters 9 and 10: `graphs`;
-* Team Project: `projects`.
+### ♟️ Checkers
+- Standard 8x8 board (playable on black tiles only)
+- Player White (human) vs Player Black (AI)
+- Movement: Forward diagonal moves
+- Game ends if no valid moves or no pieces remain
+- MCTS AI for decision-making
 
-Other package directories contain other code.
+---
 
-In order to find TODOs, etc. you should use the TODO tool window.
-I recommend adding the following pattern to be recognized as needing attention
-(TODO is already a known pattern):
-* \bTO BE IMPLEMENTED\b.*
+## 🧠 Monte Carlo Tree Search (MCTS)
 
-This will make it easy to see where you have to write code.
+- **Selection:** Uses UCB1 for balancing exploration vs exploitation
+- **Simulation:** Runs random playouts from current state
+- **Expansion:** Adds new nodes for unexplored moves
+- **Backpropagation:** Updates statistics after simulation
+- **Iterative Deepening:** Benchmarked with 100–1600 iterations
 
-## Building and Testing (Java)
-If you have cloned (or forked) the repository into IDEA, it should build the Java project
-for you without much intervention on your part.
-You will need at least Java 17 as your SDK.
-Recommended: Oracle OpenJDK 18.0.2
+---
 
-To test the installation, run all the tests in `src/test/java`.
-There are about a thousand active tests, of which two-thirds should run green.
-Don't worry about the failing tests--they fail because there are stubs in the code
-that you need to replace with functioning code in many places
-(see above in Navigation).
+## 📊 Benchmarking Observations
 
-There are also functional tests in the `src/it/java` directory.
-However, these take significantly longer to run and are really not necessary. 
+### TicTacToe
+- Player X dominates at low iterations (100–800)
+- All games draw at 1600 iterations (optimal play)
+- Player 0 (AI) has no wins at lower levels
+- Computation time increases with more iterations
 
-## Building and Testing (Python)
+### Checkers
+- White wins slightly more overall
+- Players are balanced in performance
+- Draws occur only at higher iteration levels
+- Computation time grows significantly as iterations increase
+
+### 📊 Observation Charts
+
+- [TicTacToe Observation Sheet](https://docs.google.com/spreadsheets/d/15P8nzy6nSBB7ojTekfV9zSdQAPnChz-LFBRZZ_vc7AY/edit?usp=sharing)
+- [Checkers Observation Sheet](https://northeastern-my.sharepoint.com/:x:/g/personal/pratapwar_s_northeastern_edu/EZXoJ7LxvjdFrQ24QRFvO_4BEfURCLdWyIEk1pBd-1Xi9Q?e=gXWAKm)
+
+---
+
+## 🚀 How to Run
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/PSA-Final-Project/PSA-Final-Project
+```
+
+### 2. 📂 Open the Project
+
+Open the project in your preferred Java IDE (e.g., IntelliJ, Eclipse, NetBeans)
+
+---
+
+### 3. ▶️ Running TicTacToe
+
+- **GUI:** Run  
+  `src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/tictactoe/TicTacToeGUI.java`
+
+- **Benchmarking Tool:** Run  
+  `src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/tictactoe/TicTacToeBenchmark.java`
+
+### TicTacToe UI Preview
+
+[//]: # (<img src="assets/tictactoeGUI.png" alt="TicTacToe UI" width="400"/>)
+<p align="center">
+  <img src="assets/tictactoeGUI.png" alt="TicTacToe UI" width="400"/>
+</p>
+
+---
+
+### 4. ▶️ Running Checkers
+
+- **GUI:** Run  
+  `src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/checkers/CheckersGUI.java`
+
+- **Benchmarking Tool:** Run  
+  `src/main/java/com/phasmidsoftware/dsaipg/projects/mcts/checkers/CheckersBenchmark.java`
+
+### Checkers UI Preview
+<p align="center">
+  <img src="assets/checkerGUI.png" alt="Checkers UI" width="400"/>
+</p>
+
+[//]: # (<img src="assets/checkerGUI.png" alt="Checkers UI" width="400"/>)
+
+> ⚠️ **Note:** Make sure Java **23+** is installed and set as the project SDK.
+
+---
+
+### 5. 🎥 Demo Videos
+
+- [ ] TicTacToe Gameplay – 
+- [ ] Checkers Gameplay – 
+
+---
+
+### 👨‍💻 Contributors
+
+- **Shreya Wanisha** (<wanisha.s@northeastern.edu>)
+- **Shriya Pratapwar** (<pratapwar.s@northeastern.edu>)
+- **Dharana Kashyap** (<kashyap.dh@northeastern.edu>)
