@@ -122,7 +122,7 @@ Open the project in your preferred Java IDE (e.g., IntelliJ, Eclipse, NetBeans)
 
 ### 🎮 Checkers Gameplay Demo
 
-<a href="https://drive.google.com/file/d/10dpuRsVw5TFtEp0RZFBaC0HuPaaieLvK/view?usp=drive_link" target="_blank">
+<a href="https://drive.google.com/file/d/1Ws6EOGlv8NC68guWRWm7VECyBKwRdv1k/view?usp=drive_link" target="_blank">
   <img src="assets/checkerGUI.png" alt="Checkers Demo Video" width="300"/>
 </a>
 
