@@ -114,8 +114,14 @@ Open the project in your preferred Java IDE (e.g., IntelliJ, Eclipse, NetBeans)
 
 ### 5. 🎥 Demo Videos
 
-- [ ] TicTacToe Gameplay – 
-- [ ] Checkers Gameplay – 
+### 🎮 TicTacToe Gameplay Demo
+
+<a href="https://drive.google.com/file/d/1WMXLxa9RBpvCWiPqA28i4Ky-aIyIm2lP/view?usp=sharing" target="_blank">
+  <img src="assets/tictactoeGUI.png" alt="TicTacToe Demo Video" width="300"/>
+</a>
+
+### 🎮 Checkers Gameplay Demo
+
 
 ---
 
