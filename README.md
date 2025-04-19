@@ -128,6 +128,11 @@ Open the project in your preferred Java IDE (e.g., IntelliJ, Eclipse, NetBeans)
 
 ---
 
+## 📄 Final Project Report
+
+You can view the complete report here:  
+[📘 PSA Final Report (PDF)](report/PSA_FinalProject_Report.pdf)
+
 ### 👨‍💻 Contributors
 
 - **Shreya Wanisha** (<wanisha.s@northeastern.edu>)
