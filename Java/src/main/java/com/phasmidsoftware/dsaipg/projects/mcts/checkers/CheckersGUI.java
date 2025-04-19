@@ -52,7 +52,7 @@ public class CheckersGUI extends JFrame {
         int[][] board = state.getBoard();
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                JPanel cell = new JPanel();
+                JPanel cell = new JPanel(new GridBagLayout());    // <-- use GridBagLayout to center
                 boolean isLight = (row + col) % 2 == 0;
                 cell.setBackground(isLight ? new Color(240, 217, 181) : new Color(181, 136, 99));
 
@@ -81,16 +81,23 @@ public class CheckersGUI extends JFrame {
         boardPanel.repaint();
     }
 
-    private JLabel makePiece(Color color, int row, int col) {
-        JLabel piece = new JLabel();
-        piece.setOpaque(true);
-        piece.setBackground(color);
+    private JPanel makePiece(Color color, int row, int col) {
+        JPanel piece = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                int diameter = Math.min(getWidth(), getHeight()) - 4;      // leave a small padding
+                int x = (getWidth()  - diameter) / 2;
+                int y = (getHeight() - diameter) / 2;
+                g.setColor(color);
+                g.fillOval(x, y, diameter, diameter);
+                // optional border:
+                g.setColor(color.darker());
+                g.drawOval(x, y, diameter, diameter);
+            }
+        };
         piece.setPreferredSize(new Dimension(44, 44));
-        piece.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
-        piece.setHorizontalAlignment(SwingConstants.CENTER);
-        piece.setVerticalAlignment(SwingConstants.CENTER);
-        piece.setAlignmentX(Component.CENTER_ALIGNMENT);
-        piece.setAlignmentY(Component.CENTER_ALIGNMENT);
+        piece.setOpaque(false);
         piece.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (row != -1 && col != -1) handleClick(row, col);
@@ -98,6 +105,7 @@ public class CheckersGUI extends JFrame {
         });
         return piece;
     }
+
 
     private void handleClick(int row, int col) {
         if (state.isTerminal()) return;
